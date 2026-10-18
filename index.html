@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demuestra tu cultura literaria</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#fff;background:#15171d;--gold:#ffd765;--red:#b90c40}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;}body{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:10px;background:#17181d}
+.game{width:min(100%,1280px);margin:auto}.board{container-type:inline-size;position:relative;width:100%;aspect-ratio:793/447;background:#ccc url('background.png') center/100% 100% no-repeat;overflow:hidden;isolation:isolate;border-radius:9px;box-shadow:0 10px 30px #0007}
+.heading{position:absolute;top:4.2%;left:3.6%;right:2%;z-index:2;color:#161616;pointer-events:none}.heading h1{font-size:3.45cqw;font-weight:500;line-height:1.05;color:#bf003c;margin:0 0 .55cqw}.heading p{margin:0;font-size:1.65cqw;line-height:1.22;color:#111}
+.slot{position:absolute;width:15.25%;height:29.75%;left:var(--x);top:var(--y);border-radius:3px;display:flex;align-items:end;justify-content:center;padding:1px;touch-action:none;user-select:none;cursor:pointer;outline-offset:-3px}.slot.over{box-shadow:inset 0 0 0 4px #ffe277}.slot:focus-visible{outline:3px solid #fff}.slot .name{width:100%;margin-bottom:2px;pointer-events:none}.slot.filled{cursor:grab}
+.name{background:rgba(15,15,19,.82);color:var(--gold);font-size:1.92cqw;line-height:1.04;text-align:center;border-radius:1.8cqw;padding:.45cqw .2cqw;box-shadow:0 2px 6px #0006;white-space:normal;user-select:none;touch-action:none}.name span{display:block}
+.cat{position:absolute;left:83.9%;top:75.1%;width:12.7%;height:22.4%;z-index:5;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;padding:0;touch-action:manipulation}.cat img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 2px #0006)}.cat:active{transform:scale(.94)}.cat:disabled{cursor:default;opacity:1}.cat:focus-visible{outline:2px solid #db184b;border-radius:6px}
+.tray{position:absolute;left:37.6%;top:84.5%;width:21%;height:12%;z-index:6;display:grid;place-items:center;touch-action:none}.tray .name{font-size:2.05cqw;min-width:70%;max-width:100%;padding:.55cqw .4cqw;border:.18cqw solid #e6cd88;border-radius:2cqw;cursor:grab}.placeholder{font-size:1.38cqw;line-height:1.15;text-align:center;color:#242424;background:#ffffffd9;padding:.4cqw .6cqw;border-radius:1cqw;max-width:100%}
+.action{font-weight:800;font-size:1.65cqw;border:0;border-radius:1.2cqw;background:var(--red);color:white;padding:1.15cqw 1.6cqw;cursor:pointer;box-shadow:0 .5cqw 0 #710122;max-width:100%}.action:active{transform:translateY(2px)}.confirm{position:absolute;left:26%;top:84%;width:47%;z-index:7}.hidden{display:none!important}.status{position:absolute;bottom:1.5%;left:3%;font-size:1.34cqw;color:#252525;background:#ffffffb7;padding:.25cqw .5cqw;border-radius:.5cqw}
+.shade{position:fixed;inset:0;display:grid;place-items:center;background:#050509c9;z-index:40;padding:20px}.dialog{background:#252630;color:white;border:2px solid #e2b3bf;border-radius:20px;padding:28px 24px;width:min(100%,390px);text-align:center;box-shadow:0 15px 45px #000a}.dialog h2{font-size:clamp(24px,5vw,34px);margin:0 0 12px}.dialog p{line-height:1.5;font-size:17px;margin:0 0 25px}.dialog .action{font-size:18px;padding:14px 20px;border-radius:12px}
+.dragghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;width:150px;font-size:18px;transform:translate(-50%,-50%);opacity:.92;border:2px solid #fff3b2;padding:6px}.dragging{opacity:.32}
+@media(max-width:600px) and (orientation:portrait){body{padding:2px;align-items:center}.board{border-radius:3px}.heading h1{font-size:3.25cqw}.heading p{font-size:1.56cqw}.slot .name{font-size:1.97cqw;padding:.3cqw .1cqw}.tray .name{font-size:2.2cqw}.placeholder{font-size:1.4cqw}.status{font-size:1.4cqw}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="game">
+<section class="board" id="board" aria-label="Juego de escritores y escritoras">
+<header class="heading"><h1>Demuestra tu cultura literaria</h1><p>Toca al gato para sacar el nombre de un escritor o escritora.<br>Arrastra el nombre a la imagen que corresponde.</p></header>
+<button type="button" class="cat" id="cat" aria-label="Sacar un nombre del sobre"><img src="cat.png" alt="Gato con un sobre rojo"></button>
+<div class="tray" id="tray" aria-live="polite"><div class="placeholder">Toca al gato para comenzar</div></div>
+<button id="confirm" type="button" class="action confirm hidden">CONFIRMAR MIS RESPUESTAS</button>
+<div class="status" id="status" aria-live="polite"></div>
+</section>
+</main>
+<div class="shade hidden" id="shade" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="dialog"><h2 id="result-title"></h2><p id="result-text"></p><button class="action" type="button" id="again">JUGAR DE NUEVO</button></div></div>
+<audio id="music" src="bg-music.mp3" loop preload="none"></audio><audio id="meow" src="meow.mp3" preload="auto"></audio><audio id="win" src="winning.mp3" preload="auto"></audio><audio id="lose" src="losing.mp3" preload="auto"></audio>
+<script>
+'use strict';
+// El orden de los escritores corresponde a las imágenes: 5 arriba, 5 abajo.
+const authors=[
+ ['Clarice','Lispector'],['Agustina','Bazterrica'],['Piedad','Bonnett'],['Alfonsina','Storni'],['Ana María','Shua'],
+ ['Manuel','Zapata'],['Julio','Cortázar'],['Horacio','Quiroga'],['Augusto','Monterroso'],['Jorge Luis','Borges']
+];
+// Coordenadas de cada retrato calculadas a partir de la maqueta 793 × 447.
+const positions=[
+ [21,97],[151,97],[280,97],[409,97],[538,97],
+ [21,239],[151,239],[280,239],[409,239],[538,239]
+];
+const board=document.getElementById('board'),tray=document.getElementById('tray'),cat=document.getElementById('cat'),confirmBtn=document.getElementById('confirm');
+const status=document.getElementById('status'),shade=document.getElementById('shade');
+const sounds={music:document.getElementById('music'),meow:document.getElementById('meow'),win:document.getElementById('win'),lose:document.getElementById('lose')};
+sounds.music.volume=.24;sounds.meow.volume=.9;
+let slots=Array(10).fill(null),queue=[],active=null,finished=false,drag=null;
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function play(sound){try{sound.currentTime=0;let p=sound.play();if(p?.catch)p.catch(()=>{});}catch(e){}}
+function createName(id){const div=document.createElement('div');div.className='name';div.dataset.id=id;for(const part of authors[id]){let span=document.createElement('span');span.textContent=part;div.append(span);}return div;}
+function render(){
+ board.querySelectorAll(':scope > .slot').forEach(el=>el.remove());slots.forEach((id,i)=>{
+  let el=document.createElement('div');el.className='slot'+(id!==null?' filled':'');el.dataset.slot=i;el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label',`Fotografía ${i+1}${id!==null?', nombre colocado: '+authors[id].join(' '):', sin nombre'}`);
+  let [x,y]=positions[i];el.style.setProperty('--x',x/793*100+'%');el.style.setProperty('--y',y/447*100+'%');
+  // Background sprite crop for two-column mobile mode.
+  el.style.setProperty('--cropx',x/(793-121)*100+'%');el.style.setProperty('--cropy',y/(447-133)*100+'%');
+  if(id!==null)el.append(createName(id));el.addEventListener('pointerdown',startDrag);el.addEventListener('click',()=>{if(!drag?.moved)place(i);});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();place(i);}});
+  board.append(el);
+ });
+ tray.innerHTML='';if(active!==null){let el=createName(active);el.tabIndex=0;el.setAttribute('aria-label','Nombre para colocar: '+authors[active].join(' '));el.addEventListener('pointerdown',startDrag);tray.append(el);}
+ else{const text=document.createElement('div');text.className='placeholder';text.textContent=queue.length?'Toca al gato para sacar otro nombre':slots.every(x=>x!==null)?'¡Los 10 nombres están colocados!':'Toca al gato para sacar un nombre';tray.append(text);}
+ cat.disabled=finished || active!==null || queue.length===0;
+ const complete=!finished&&active===null&&queue.length===0&&slots.every(x=>x!==null);
+ confirmBtn.classList.toggle('hidden',!complete);status.textContent=finished?'':`${slots.filter(x=>x!==null).length} de 10 nombres colocados`;
+}
+function place(target,from=null){if(finished)return;
+ // If moving an already placed name, it swaps with the destination.
+ if(from!==null){if(from===target)return;[slots[from],slots[target]]=[slots[target],slots[from]];render();return;}
+ if(active===null)return;const displaced=slots[target];slots[target]=active;active=displaced;render();
+}
+function startDrag(e){if(finished||e.button!==0)return;const el=e.currentTarget;let from=el.classList.contains('slot')?Number(el.dataset.slot):null;let id=from===null?active:slots[from];if(id===null)return;
+ drag={from,id,startX:e.clientX,startY:e.clientY,moved:false,pointerId:e.pointerId,source:el,ghost:null};
+ el.setPointerCapture?.(e.pointerId);el.addEventListener('pointermove',moveDrag);el.addEventListener('pointerup',endDrag);el.addEventListener('pointercancel',cancelDrag);
+}
+function moveDrag(e){if(!drag||e.pointerId!==drag.pointerId)return;let d=drag;if(!d.moved&&Math.hypot(e.clientX-d.startX,e.clientY-d.startY)>6){d.moved=true;d.ghost=createName(d.id);d.ghost.classList.add('dragghost');document.body.append(d.ghost);d.source.classList.add('dragging');}
+ if(d.moved){d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';document.querySelectorAll('.slot.over').forEach(el=>el.classList.remove('over'));let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.slot');if(target)target.classList.add('over');}
+}
+function cleanDrag(){if(!drag)return;let d=drag;d.source.removeEventListener('pointermove',moveDrag);d.source.removeEventListener('pointerup',endDrag);d.source.removeEventListener('pointercancel',cancelDrag);d.source.classList.remove('dragging');d.ghost?.remove();document.querySelectorAll('.slot.over').forEach(el=>el.classList.remove('over'));drag=null;}
+function endDrag(e){if(!drag||e.pointerId!==drag.pointerId)return;let d=drag,target=d.moved?document.elementFromPoint(e.clientX,e.clientY)?.closest('.slot'):null;let from=d.from;let moved=d.moved;cleanDrag();if(moved&&target){let to=Number(target.dataset.slot);place(to,from);}else if(moved&&from!==null&&e.clientY>board.getBoundingClientRect().bottom&&active===null){active=slots[from];slots[from]=null;render();}}
+function cancelDrag(){cleanDrag();}
+cat.addEventListener('click',()=>{if(finished||active!==null||!queue.length)return;play(sounds.meow);play(sounds.music);active=queue.pop();render();});
+confirmBtn.addEventListener('click',()=>{if(finished||slots.some(x=>x===null)||queue.length||active!==null)return;finished=true;sounds.music.pause();const won=slots.every((id,i)=>id===i);play(won?sounds.win:sounds.lose);document.getElementById('result-title').textContent=won?'¡FELICITACIONES! 🎉':'¡INTÉNTALO DE NUEVO!';document.getElementById('result-text').textContent=won?'¡Identificaste correctamente a los 10 escritores!':'Puedes volver a jugar.';shade.classList.remove('hidden');render();});
+function restart(){sounds.win.pause();sounds.lose.pause();slots=Array(10).fill(null);queue=shuffle([...authors.keys()]);active=null;finished=false;shade.classList.add('hidden');sounds.music.currentTime=0;render();}
+document.getElementById('again').addEventListener('click',restart);restart();
+</script>
+</body>
+</html>
