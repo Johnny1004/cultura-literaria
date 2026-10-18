@@ -12,7 +12,7 @@
 .name{background:rgba(15,15,19,.82);color:var(--gold);font-size:1.92cqw;line-height:1.04;text-align:center;border-radius:1.8cqw;padding:.45cqw .2cqw;box-shadow:0 2px 6px #0006;white-space:normal;user-select:none;touch-action:none}.name span{display:block}
 .cat{position:absolute;left:83.9%;top:75.1%;width:12.7%;height:22.4%;z-index:5;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;padding:0;touch-action:manipulation}.cat img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 2px #0006)}.cat:active{transform:scale(.94)}.cat:disabled{cursor:default;opacity:1}.cat:focus-visible{outline:2px solid #db184b;border-radius:6px}
 .tray{position:absolute;left:37.6%;top:84.5%;width:21%;height:12%;z-index:6;display:grid;place-items:center;touch-action:none}.tray .name{font-size:2.05cqw;min-width:70%;max-width:100%;padding:.55cqw .4cqw;border:.18cqw solid #e6cd88;border-radius:2cqw;cursor:grab}.placeholder{font-size:1.38cqw;line-height:1.15;text-align:center;color:#242424;background:#ffffffd9;padding:.4cqw .6cqw;border-radius:1cqw;max-width:100%}
-.action{font-weight:800;font-size:1.65cqw;border:0;border-radius:1.2cqw;background:var(--red);color:white;padding:1.15cqw 1.6cqw;cursor:pointer;box-shadow:0 .5cqw 0 #710122;max-width:100%}.action:active{transform:translateY(2px)}.confirm{position:absolute;left:26%;top:84%;width:47%;z-index:7}.hidden{display:none!important}.status{position:absolute;bottom:1.5%;left:3%;font-size:1.34cqw;color:#252525;background:#ffffffb7;padding:.25cqw .5cqw;border-radius:.5cqw}
+.action{font-weight:800;font-size:1.65cqw;border:0;border-radius:1.2cqw;background:var(--red);color:white;padding:1.15cqw 1.6cqw;cursor:pointer;box-shadow:0 .5cqw 0 #710122;max-width:100%}.action:active{transform:translateY(2px)}.confirm{position:absolute;left:26%;top:84%;width:47%;z-index:7}.hidden{display:none!important}.status{position:absolute;bottom:5.5%;left:3%;font-size:1.34cqw;color:#252525;background:#ffffffb7;padding:.25cqw .5cqw;border-radius:.5cqw}
 .shade{position:fixed;inset:0;display:grid;place-items:center;background:#050509c9;z-index:40;padding:20px}.dialog{background:#252630;color:white;border:2px solid #e2b3bf;border-radius:20px;padding:28px 24px;width:min(100%,390px);text-align:center;box-shadow:0 15px 45px #000a}.dialog h2{font-size:clamp(24px,5vw,34px);margin:0 0 12px}.dialog p{line-height:1.5;font-size:17px;margin:0 0 25px}.dialog .action{font-size:18px;padding:14px 20px;border-radius:12px}
 .dragghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;width:150px;font-size:18px;transform:translate(-50%,-50%);opacity:.92;border:2px solid #fff3b2;padding:6px}.dragging{opacity:.32}
 @media(max-width:600px) and (orientation:portrait){body{padding:2px;align-items:center}.board{border-radius:3px}.heading h1{font-size:3.25cqw}.heading p{font-size:1.56cqw}.slot .name{font-size:1.97cqw;padding:.3cqw .1cqw}.tray .name{font-size:2.2cqw}.placeholder{font-size:1.4cqw}.status{font-size:1.4cqw}}
@@ -24,7 +24,7 @@
 <section class="board" id="board" aria-label="Juego de escritores y escritoras">
 <header class="heading"><h1>Demuestra tu cultura literaria</h1><p>Toca al gato para sacar el nombre de un escritor o escritora.<br>Arrastra el nombre a la imagen que corresponde.</p></header>
 <button type="button" class="cat" id="cat" aria-label="Sacar un nombre del sobre"><img src="cat.png" alt="Gato con un sobre rojo"></button>
-<div class="tray" id="tray" aria-live="polite"><div class="placeholder">Toca al gato para comenzar</div></div>
+<div class="tray" id="tray" aria-live="polite"></div>
 <button id="confirm" type="button" class="action confirm hidden">CONFIRMAR MIS RESPUESTAS</button>
 <div class="status" id="status" aria-live="polite"></div>
 </section>
@@ -61,7 +61,7 @@ function render(){
   board.append(el);
  });
  tray.innerHTML='';if(active!==null){let el=createName(active);el.tabIndex=0;el.setAttribute('aria-label','Nombre para colocar: '+authors[active].join(' '));el.addEventListener('pointerdown',startDrag);tray.append(el);}
- else{const text=document.createElement('div');text.className='placeholder';text.textContent=queue.length?'Toca al gato para sacar otro nombre':slots.every(x=>x!==null)?'¡Los 10 nombres están colocados!':'Toca al gato para sacar un nombre';tray.append(text);}
+ // La bandeja queda vacía cuando no hay un nombre disponible.
  cat.disabled=finished || active!==null || queue.length===0;
  const complete=!finished&&active===null&&queue.length===0&&slots.every(x=>x!==null);
  confirmBtn.classList.toggle('hidden',!complete);status.textContent=finished?'':`${slots.filter(x=>x!==null).length} de 10 nombres colocados`;
